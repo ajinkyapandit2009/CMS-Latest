@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="java.time.LocalDate"/>
+    <fullyQualifiedTypeName name="java.time.LocalDateTime"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.ManyToOne"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.Id"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.GeneratedValue"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.Column"/>
+    <fullyQualifiedTypeName name="com.example.cmsbackend.entities.Priority"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.Entity"/>
+    <fullyQualifiedTypeName name="lombok.NoArgsConstructor"/>
+    <fullyQualifiedTypeName name="jakarta.validation.constraints.Pattern"/>
+    <fullyQualifiedTypeName name="org.springframework.security.core.userdetails.UserDetails"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.entities.Citizen"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.OneToOne"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.Table"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.MapsId"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.JoinColumn"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.Enumerated"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.EnumType"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.enums.Role"/>
+    <fullyQualifiedTypeName name="org.springframework.beans.factory.annotation.Autowired"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.security.jwt.AuthEntryPointJwt"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.security.jwt.AuthFilter"/>
+    <fullyQualifiedTypeName name="org.springframework.web.bind.annotation.GetMapping"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.entities.Complaint"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.OneToMany"/>
+    <fullyQualifiedTypeName name="lombok.AllArgsConstructor"/>
+    <fullyQualifiedTypeName name="lombok.Data"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.FetchType"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.repositories.ComplaintHistoryRepository"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.entities.ComplaintHistory"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.dtos.AssignComplaintRequestDto"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.entities.CaseOfficer"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.repositories.CaseOfficerRepository"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.repositories.UserRepository"/>
+    <fullyQualifiedTypeName name="org.springframework.security.crypto.password.PasswordEncoder"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.dtos.UpdateComplaintStatusRequestDto"/>
+    <fullyQualifiedTypeName name="jakarta.validation.Valid"/>
+    <fullyQualifiedTypeName name="org.springframework.data.domain.Sort"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="org.springframework.data.jpa.repository.Query"/>
+    <fullyQualifiedTypeName name="org.springframework.data.repository.query.Param"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.enums.ComplaintStatus"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.enums.ComplaintPriority"/>
+    <fullyQualifiedTypeName name="com.cmsbackend.dtos.UpdateComplaintPriorityRequestDto"/>
+</qualifiedTypeNameHistroy>

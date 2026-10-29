@@ -1,0 +1,5 @@
+package com.cmsbackend.security.jwt;
+
+public class AuthEntryPointJwt {
+
+}

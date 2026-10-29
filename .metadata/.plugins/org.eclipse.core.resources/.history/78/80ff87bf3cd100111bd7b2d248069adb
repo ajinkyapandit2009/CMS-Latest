@@ -1,0 +1,87 @@
+
+package com.cmsbackend.services.impl;
+
+import java.util.Locale;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.cmsbackend.dtos.UserRequestDto;
+import com.cmsbackend.dtos.UserResponseDto;
+import com.cmsbackend.entities.Citizen;
+import com.cmsbackend.entities.User;
+import com.cmsbackend.repositories.CitizenRepository;
+import com.cmsbackend.repositories.UserRepository;
+import com.cmsbackend.services.UserService;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final CitizenRepository citizenRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
+
+    public UserServiceImpl(
+            UserRepository userRepository,
+            CitizenRepository citizenRepository,
+            PasswordEncoder passwordEncoder,
+            ModelMapper modelMapper) {
+
+        this.userRepository = userRepository;
+        this.citizenRepository = citizenRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.modelMapper = modelMapper;
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto registerUser(UserRequestDto request) {
+
+        // 1. Check password confirmation
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Passwords do not match");
+        }
+
+        // 2. Normalize email
+        String email = request.getEmail()
+                .trim()
+                .toLowerCase(Locale.ROOT);
+
+        // 3. Check for duplicate email
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email is already registered");
+        }
+
+        // 4. Map registration DTO to User entity
+        User user = modelMapper.map(request, User.class);
+
+        user.setEmail(email);
+
+        // Always hash passwords before storing them
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        // Public registration creates only Citizen accounts
+        user.setUserRole("CITIZEN");
+
+        // 5. Save User
+        User savedUser = userRepository.save(user);
+
+        // 6. Create corresponding Citizen profile
+        Citizen citizen = new Citizen();
+        citizen.setUser(savedUser);
+
+        citizenRepository.save(citizen);
+
+        // 7. Map saved User to response DTO
+        return modelMapper.map(savedUser, UserResponseDto.class);
+    }
+}

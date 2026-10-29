@@ -1,0 +1,97 @@
+
+package com.cmsbackend.services.impl;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.cmsbackend.dtos.CaseOfficerRequestDto;
+import com.cmsbackend.dtos.CaseOfficerResponseDto;
+import com.cmsbackend.entities.CaseOfficer;
+import com.cmsbackend.entities.User;
+import com.cmsbackend.enums.Role;
+import com.cmsbackend.repositories.CaseOfficerRepository;
+import com.cmsbackend.repositories.UserRepository;
+import com.cmsbackend.services.CaseOfficerService;
+
+@Service
+public class CaseOfficerServiceImpl implements CaseOfficerService {
+
+    @Autowired
+    private CaseOfficerRepository caseOfficerRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Override
+    @Transactional
+    public CaseOfficerResponseDto createCaseOfficer(
+            CaseOfficerRequestDto caseOfficerRequestDto) {
+
+        // 1. Find the existing user
+        User user = userRepository
+                .findById(caseOfficerRequestDto.getUserId())
+                .orElseThrow(() ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User account not found"));
+
+        // 2. Verify the user's role
+        if (user.getUserRole() != Role.ROLE_OFFICER) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "User must have the ROLE_OFFICER role");
+        }
+
+        // 3. Check whether a profile already exists
+        if (caseOfficerRepository.existsById(user.getUserId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Case Officer profile already exists");
+        }
+
+        // 4. Check employee number
+        String employeeNumber =
+                caseOfficerRequestDto.getEmployeeNumber().trim();
+
+        if (caseOfficerRepository
+                .existsByEmployeeNumber(employeeNumber)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Employee number is already registered");
+        }
+
+        // 5. Convert DTO to entity using ModelMapper
+        CaseOfficer caseOfficer = modelMapper.map(
+                caseOfficerRequestDto,
+                CaseOfficer.class);
+
+        // Connect the entity to the existing User
+        caseOfficer.setUser(user);
+        caseOfficer.setEmployeeNumber(employeeNumber);
+
+        // 6. Save the entity
+        CaseOfficer savedCaseOfficer =
+                caseOfficerRepository.save(caseOfficer);
+
+        // 7. Convert entity to response DTO using ModelMapper
+        CaseOfficerResponseDto responseDto =
+                modelMapper.map(
+                        savedCaseOfficer,
+                        CaseOfficerResponseDto.class);
+
+        // Map fields from the associated User
+        responseDto.setUserId(user.getUserId());
+        responseDto.setFirstName(user.getFirstName());
+        responseDto.setLastName(user.getLastName());
+        responseDto.setEmail(user.getEmail());
+
+        return responseDto;
+    }
+}

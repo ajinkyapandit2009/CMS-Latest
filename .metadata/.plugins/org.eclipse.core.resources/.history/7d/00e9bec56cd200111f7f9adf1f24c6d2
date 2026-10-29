@@ -1,0 +1,131 @@
+
+package com.cmsbackend.services.impl;
+
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.cmsbackend.dtos.ComplaintRequestDto;
+import com.cmsbackend.dtos.ComplaintResponseDto;
+import com.cmsbackend.entities.Citizen;
+import com.cmsbackend.entities.Complaint;
+import com.cmsbackend.entities.User;
+import com.cmsbackend.enums.ComplaintPriority;
+import com.cmsbackend.enums.ComplaintStatus;
+import com.cmsbackend.enums.Role;
+import com.cmsbackend.repositories.CitizenRepository;
+import com.cmsbackend.repositories.ComplaintRepository;
+import com.cmsbackend.repositories.UserRepository;
+import com.cmsbackend.services.ComplaintService;
+
+@Service
+public class ComplaintServiceImpl implements ComplaintService {
+
+    @Autowired
+    private ComplaintRepository complaintRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CitizenRepository citizenRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Override
+    @Transactional
+    public ComplaintResponseDto createComplaint(
+            ComplaintRequestDto requestDto,
+            String email) {
+
+        // 1. Find the logged-in user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User account not found"));
+
+        // 2. Only citizens can submit complaints
+        if (user.getUserRole() != Role.ROLE_CITIZEN) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only citizens can submit complaints");
+        }
+
+        // 3. Find the citizen profile
+        Citizen citizen = citizenRepository.findById(user.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Citizen profile not found"));
+
+        // 4. Convert the request DTO into an entity
+        Complaint complaint =
+                modelMapper.map(requestDto, Complaint.class);
+
+        // 5. Set the relationships and initial values
+        complaint.setCitizen(citizen);
+        complaint.setStatus(ComplaintStatus.SUBMITTED);
+        
+        if (requestDto.getPriority() == null) {
+            complaint.setPriority(ComplaintPriority.MEDIUM);
+        }
+
+        // 6. Save the complaint
+        Complaint savedComplaint =
+                complaintRepository.save(complaint);
+
+        // 7. Convert the saved entity into a response DTO
+        ComplaintResponseDto responseDto =
+                modelMapper.map(
+                        savedComplaint,
+                        ComplaintResponseDto.class);
+
+        responseDto.setCitizenId(citizen.getUserId());
+        responseDto.setOfficerId(null);
+        
+        return responseDto;
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<ComplaintResponseDto> getMyComplaints(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User account not found"));
+
+        if (user.getUserRole() != Role.ROLE_CITIZEN) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only citizens can view their complaints");
+        }
+
+        Citizen citizen = citizenRepository.findById(user.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Citizen profile not found"));
+
+        List<Complaint> complaints =
+                complaintRepository.findByCitizen_UserIdOrderByCreatedAtDesc(
+                        citizen.getUserId());
+
+        return complaints.stream().map(complaint -> {
+            ComplaintResponseDto dto =
+                    modelMapper.map(complaint, ComplaintResponseDto.class);
+
+            dto.setCitizenId(citizen.getUserId());
+            dto.setOfficerId(
+                    complaint.getOfficer() == null
+                            ? null
+                            : complaint.getOfficer().getUserId());
+
+            return dto;
+        }).toList();
+    }
+}
