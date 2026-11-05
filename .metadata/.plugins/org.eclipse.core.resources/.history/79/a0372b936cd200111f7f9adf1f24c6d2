@@ -1,5 +1,0 @@
-package com.cmsbackend.dtos;
-
-public class AssignComplaintRequestDto {
-
-}

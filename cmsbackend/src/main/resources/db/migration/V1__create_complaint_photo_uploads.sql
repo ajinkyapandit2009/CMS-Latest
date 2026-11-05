@@ -1,0 +1,21 @@
+CREATE TABLE complaint_photo_uploads (
+    upload_id CHAR(36) NOT NULL,
+    user_id INT NOT NULL,
+    storage_key VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    file_size BIGINT NOT NULL,
+    latitude DECIMAL(10,8) NOT NULL,
+    longitude DECIMAL(11,8) NOT NULL,
+    accuracy_meters DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NULL,
+    consumed_at TIMESTAMP NULL,
+    complaint_id INT NULL,
+    PRIMARY KEY (upload_id),
+    UNIQUE KEY uk_complaint_photo_uploads_storage_key (storage_key),
+    UNIQUE KEY uk_complaint_photo_uploads_complaint_id (complaint_id),
+    KEY idx_complaint_photo_uploads_user_created (user_id, created_at),
+    KEY idx_complaint_photo_uploads_expiry (expires_at),
+    CONSTRAINT fk_complaint_photo_uploads_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT fk_complaint_photo_uploads_complaint FOREIGN KEY (complaint_id) REFERENCES complaint(complaint_id)
+);

@@ -1,0 +1,63 @@
+spring.application.name=cmsbackend
+
+server.port=8080
+
+
+# =============================================================
+# DATABASE SETTINGS
+# =============================================================
+
+spring.datasource.url=${CMS_DB_URL:jdbc:mysql://localhost:3306/cms}
+spring.datasource.username=root
+spring.datasource.password=${CMS_DB_PASSWORD}
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+
+# =============================================================
+# HIBERNATE / JPA SETTINGS
+# =============================================================
+
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+
+# =============================================================
+# JWT SETTINGS
+# =============================================================
+
+spring.app.jwtSecret=${CMS_JWT_SECRET}
+spring.app.jwtExpirationMs=604800000
+
+
+# =============================================================
+# COMPLAINT PHOTO SETTINGS
+# =============================================================
+
+# Complaint photos are stored outside the application source tree
+cms.photo.storage-dir=uploads/complaints
+
+# Maximum upload size: 5 MB
+cms.photo.max-size-bytes=5242880
+
+# Maximum accepted GPS accuracy in meters
+cms.photo.max-accuracy-meters=50
+
+
+# =============================================================
+# LOCATION SHARING / QR SETTINGS
+# =============================================================
+
+# React frontend URL used when generating phone location-sharing links
+// cms.location-sharing.frontend-base-url=${CMS_FRONTEND_BASE_URL:http://localhost:5173}
+cms.location-sharing.frontend-base-url=http://192.168.1.4:5173
+# QR/location-sharing session expires after 5 minutes
+cms.location-sharing.expiry-minutes=5
+
+
+# =============================================================
+# CORS SETTINGS
+# =============================================================
+
+# Frontend origins allowed to communicate with the backend
+cms.cors.allowed-origins=${CMS_ALLOWED_ORIGINS:http://localhost:5173}

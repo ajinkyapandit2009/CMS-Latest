@@ -1,0 +1,9 @@
+.complaint-photo-trigger { display: block; width: 100%; padding: 0; background: transparent; border: 0; cursor: zoom-in; }
+.complaint-photo-trigger:focus-visible { outline: 3px solid var(--teal); outline-offset: -3px; }
+.complaint-image-modal { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; background: #081e1bcc; }
+.complaint-image-dialog { position: relative; display: grid; place-items: center; width: min(960px, 100%); max-height: calc(100dvh - 2rem); padding: 3.5rem 1rem 1rem; background: white; border-radius: var(--radius-md); box-shadow: var(--shadow); }
+.complaint-image-dialog img { display: block; max-width: 100%; max-height: calc(100dvh - 6.5rem); object-fit: contain; }
+.complaint-image-close { position: absolute; top: .65rem; right: .65rem; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; color: var(--forest); background: var(--mint-pale); border: 1px solid var(--line); border-radius: 50%; cursor: pointer; font-size: 1.8rem; line-height: 1; }
+.complaint-image-close:hover { background: var(--mint); }
+.complaint-image-close:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+@media (max-width: 540px) { .complaint-image-modal { padding: .5rem; }.complaint-image-dialog { max-height: calc(100dvh - 1rem); padding: 3.5rem .5rem .5rem; }.complaint-image-dialog img { max-height: calc(100dvh - 5rem); } }

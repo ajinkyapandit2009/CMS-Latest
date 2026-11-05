@@ -14,6 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,10 +23,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.cmsbackend.dtos.LoginRequestDto;
 import com.cmsbackend.dtos.LoginResponseDto;
+import com.cmsbackend.dtos.ProfileUpdateRequestDto;
 import com.cmsbackend.dtos.UserResponseDto;
 import com.cmsbackend.entities.User;
 import com.cmsbackend.repositories.UserRepository;
 import com.cmsbackend.security.jwt.JwtUtils;
+import com.cmsbackend.services.impl.UserProfileService;
 
 import jakarta.validation.Valid;
 
@@ -48,16 +51,21 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserProfileService profileService;
+
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getCurrentUser(
             Authentication authentication) {
 
-        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(profileService.getProfile(authentication.getName()));
+    }
 
-        UserResponseDto responseDto =
-                modelMapper.map(user, UserResponseDto.class);
-
-        return ResponseEntity.ok(responseDto);
+    @PatchMapping("/me")
+    public ResponseEntity<UserResponseDto> updateCurrentUser(
+            @Valid @RequestBody ProfileUpdateRequestDto request,
+            Authentication authentication) {
+        return ResponseEntity.ok(profileService.updateProfile(authentication.getName(), request));
     }
     
     @PostMapping("/login")

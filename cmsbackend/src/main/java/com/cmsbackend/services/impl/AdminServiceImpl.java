@@ -6,17 +6,21 @@ import java.util.Locale;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.cmsbackend.dtos.UserRequestDto;
-import com.cmsbackend.dtos.UserResponseDto;
+import com.cmsbackend.dtos.CaseOfficerResponseDto;
+import com.cmsbackend.dtos.CaseOfficerRequestDto;
 import com.cmsbackend.entities.User;
 import com.cmsbackend.enums.Role;
 import com.cmsbackend.repositories.UserRepository;
 import com.cmsbackend.services.AdminService;
+import com.cmsbackend.services.CaseOfficerService;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -30,10 +34,25 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private CaseOfficerService caseOfficerService;
+
+    @Autowired
+    private WorkloadCoordinator workloadCoordinator;
+
     @Override
-    @Transactional
-    public UserResponseDto createCaseOfficerAccount(
-            UserRequestDto userRequestDto) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public CaseOfficerResponseDto createCaseOfficerWithProfile(UserRequestDto request) {
+        // Match the profile/complaint lock order before creating either record.
+        workloadCoordinator.lock();
+        User account = saveOfficerAccount(request);
+        CaseOfficerRequestDto profileRequest = new CaseOfficerRequestDto();
+        profileRequest.setUserId(account.getUserId());
+        // REQUIRED propagation keeps both inserts inside this transaction.
+        return caseOfficerService.createCaseOfficer(profileRequest);
+    }
+
+    private User saveOfficerAccount(UserRequestDto userRequestDto) {
 
         // Check whether passwords match
         if (!userRequestDto.getPassword()
@@ -49,7 +68,7 @@ public class AdminServiceImpl implements AdminService {
                 .toLowerCase(Locale.ROOT);
 
         // Check for duplicate email
-        if (userRepository.findByEmail(email).isPresent()) {
+        if (userRepository.existsByEmailIgnoreCase(email)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Email is already registered");
@@ -64,9 +83,10 @@ public class AdminServiceImpl implements AdminService {
                 passwordEncoder.encode(user.getPassword()));
 
         // Save officer account
-        User savedUser = userRepository.save(user);
-
-        // Convert saved entity to response DTO
-        return modelMapper.map(savedUser, UserResponseDto.class);
+        try {
+            return userRepository.saveAndFlush(user);
+        } catch (DataIntegrityViolationException exception) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered");
+        }
     }
 }

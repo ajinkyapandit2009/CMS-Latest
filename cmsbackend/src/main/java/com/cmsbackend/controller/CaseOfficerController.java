@@ -6,15 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cmsbackend.dtos.CaseOfficerRequestDto;
 import com.cmsbackend.dtos.CaseOfficerResponseDto;
+import com.cmsbackend.dtos.CaseOfficerWorkloadDto;
 import com.cmsbackend.services.CaseOfficerService;
 
-import jakarta.validation.Valid;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -25,21 +24,21 @@ public class CaseOfficerController {
     @Autowired
     private CaseOfficerService caseOfficerService;
 
+    /** Existing profiles are retained; new officers must be created atomically. */
+    @Deprecated
     @PostMapping
-    public ResponseEntity<CaseOfficerResponseDto> createCaseOfficer(
-            @Valid @RequestBody
-            CaseOfficerRequestDto caseOfficerRequestDto) {
-
-        CaseOfficerResponseDto responseDto =
-                caseOfficerService.createCaseOfficer(
-                        caseOfficerRequestDto);
-
-        return new ResponseEntity<>(
-                responseDto, HttpStatus.CREATED);
+    public void legacyProfileCreationDisabled() {
+        throw new ResponseStatusException(HttpStatus.GONE,
+                "Use POST /api/admin/case-officers/with-account");
     }
 
     @GetMapping
     public ResponseEntity<List<CaseOfficerResponseDto>> getAllCaseOfficers() {
         return ResponseEntity.ok(caseOfficerService.getAllCaseOfficers());
+    }
+
+    @GetMapping("/workloads")
+    public ResponseEntity<List<CaseOfficerWorkloadDto>> getOfficerWorkloads() {
+        return ResponseEntity.ok(caseOfficerService.getOfficerWorkloads());
     }
 }

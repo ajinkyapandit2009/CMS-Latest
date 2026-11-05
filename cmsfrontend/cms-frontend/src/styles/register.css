@@ -1,0 +1,11 @@
+.registration-field { display: grid; gap: .42rem; min-width: 0; }
+.registration-field label { color: var(--forest); font-size: .88rem; font-weight: 750; }
+.registration-field input { width: 100%; min-width: 0; padding: .76rem .82rem; color: var(--ink); background: #fff; border: 1px solid #bcd2ca; border-radius: var(--radius-sm); font: inherit; }
+.registration-field input:focus-visible { border-color: var(--teal); outline: none; box-shadow: 0 0 0 3px rgba(13,110,101,.14); }
+.registration-field input[aria-invalid="true"] { border-color: #c65d50; }
+.registration-field small { color: var(--ink-muted); font-size: .74rem; line-height: 1.45; }
+.registration-field-error { color: #8c291e; font-size: .78rem; line-height: 1.4; }
+.registration-availability { color: var(--ink-muted); font-size: .78rem; line-height: 1.4; }
+.registration-availability.is-available { color: #17663a; }
+.registration-retry { margin-left: .55rem; padding: .2rem .3rem; color: var(--teal-dark); background: transparent; border: 0; cursor: pointer; font: inherit; font-weight: 750; text-decoration: underline; }
+.registration-retry:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }

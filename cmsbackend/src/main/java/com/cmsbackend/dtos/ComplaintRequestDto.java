@@ -3,11 +3,10 @@ package com.cmsbackend.dtos;
 
 import java.math.BigDecimal;
 
-import com.cmsbackend.enums.ComplaintPriority;
-
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
@@ -35,12 +34,15 @@ public class ComplaintRequestDto {
 
     @DecimalMin("-90.0")
     @DecimalMax("90.0")
+    @NotNull
     private BigDecimal latitude;
 
     @DecimalMin("-180.0")
     @DecimalMax("180.0")
+    @NotNull
     private BigDecimal longitude;
 
+    @NotBlank
     @Size(max = 2048)
     private String imageUrl;
 

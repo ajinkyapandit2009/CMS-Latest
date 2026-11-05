@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -26,6 +27,9 @@ import com.cmsbackend.security.jwt.AuthFilter;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${cms.cors.allowed-origins:http://localhost:5173}")
+    private List<String> allowedOrigins;
 
     @Autowired
     private AuthFilter authFilter;
@@ -48,10 +52,12 @@ public class SecurityConfig {
                 exception.authenticationEntryPoint(authEntryPointJwt))
             .authorizeHttpRequests(request -> request
             	    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+	            .requestMatchers(HttpMethod.GET, "/users/email-availability").permitAll()
             	    .requestMatchers(
             	        HttpMethod.POST, "/users", "/auth/login"
             	    ).permitAll()
             	    .requestMatchers("/api/admin/**").hasRole("ADMIN")
+	            .requestMatchers("/api/escalations/**").hasRole("CITIZEN")
             	    .requestMatchers(
             	    	    org.springframework.http.HttpMethod.POST,
             	    	    "/api/complaints"
@@ -60,6 +66,12 @@ public class SecurityConfig {
             	    	    org.springframework.http.HttpMethod.GET,
             	    	    "/api/complaints/my"
             	    	).hasRole("CITIZEN")
+                    .requestMatchers(HttpMethod.POST, "/api/complaint-photos")
+                        .hasRole("CITIZEN")
+                    .requestMatchers(HttpMethod.POST, "/api/location-sharing/*/location")
+                        .permitAll()
+                    .requestMatchers("/api/location-sharing/sessions/**")
+                        .hasRole("CITIZEN")
             	    .requestMatchers("/api/officer/**").hasRole("OFFICER")
             	    .anyRequest().authenticated()
             	);
@@ -91,8 +103,7 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(
-            List.of("http://localhost:5173"));
+        config.setAllowedOrigins(allowedOrigins);
 
         config.setAllowedMethods(
             List.of("GET", "POST", "PUT", "PATCH",

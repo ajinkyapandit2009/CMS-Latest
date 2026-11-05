@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { dashboardForRole, getCurrentUser, loginRequest, roleFromToken } from '../services/authService'
+import { dashboardForRole, getCurrentUser, loginRequest, roleFromToken, updateCurrentUser } from '../services/authService'
 import { AuthContext } from './AuthStore'
 
 const TOKEN_KEY = 'cms_auth_token'
@@ -28,6 +28,24 @@ export function AuthProvider({ children }) {
     } catch (error) { logout(); throw error }
   }, [logout])
 
+  const refreshUser = useCallback(async () => {
+    if (!token) throw new Error('Please sign in again to view your profile.')
+    const verified = await getCurrentUser(token)
+    const nextUser = prepareUser(verified, token)
+    if (!nextUser || !dashboardForRole(nextUser.role)) throw new Error('Your account role could not be verified.')
+    setUser(nextUser)
+    return nextUser
+  }, [token])
+
+  const updateProfile = useCallback(async (details) => {
+    if (!token) throw new Error('Please sign in again to update your profile.')
+    const updated = await updateCurrentUser(details, token)
+    const nextUser = prepareUser(updated, token)
+    if (!nextUser || !dashboardForRole(nextUser.role)) throw new Error('Your account role could not be verified.')
+    setUser(nextUser)
+    return nextUser
+  }, [token])
+
   useEffect(() => {
     const restore = async () => {
       const token = localStorage.getItem(TOKEN_KEY)
@@ -43,6 +61,6 @@ export function AuthProvider({ children }) {
     restore()
   }, [logout])
 
-  const value = useMemo(() => ({ user, token, isInitializing, isAuthenticated: Boolean(user), login, logout }), [user, token, isInitializing, login, logout])
+  const value = useMemo(() => ({ user, token, isInitializing, isAuthenticated: Boolean(user), login, logout, refreshUser, updateProfile }), [user, token, isInitializing, login, logout, refreshUser, updateProfile])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

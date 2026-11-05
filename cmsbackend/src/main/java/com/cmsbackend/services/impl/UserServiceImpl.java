@@ -1,23 +1,22 @@
 
 package com.cmsbackend.services.impl;
 
-import java.util.Locale;
-
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.cmsbackend.dtos.UserRequestDto;
+import com.cmsbackend.dtos.CitizenRegistrationRequestDto;
 import com.cmsbackend.dtos.UserResponseDto;
 import com.cmsbackend.entities.Citizen;
 import com.cmsbackend.entities.User;
 import com.cmsbackend.enums.Role;
 import com.cmsbackend.repositories.CitizenRepository;
 import com.cmsbackend.repositories.UserRepository;
+import com.cmsbackend.registration.RegistrationException;
+import com.cmsbackend.registration.RegistrationRules;
 import com.cmsbackend.services.UserService;
 
 @Service
@@ -30,64 +29,61 @@ public class UserServiceImpl implements UserService {
     private CitizenRepository citizenRepository;
 
     @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
-    @Transactional // databse rollback possible
-    public UserResponseDto registerUser(UserRequestDto userRequestDto) {
-
-        // Check whether the passwords match
-        if (!userRequestDto.getPassword()
-                .equals(userRequestDto.getConfirmPassword())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Passwords do not match");
+    @Transactional
+    public UserResponseDto registerUser(CitizenRegistrationRequestDto request) {
+        if (request.getRole() != null || request.getUserRole() != null) {
+            throw new RegistrationException(HttpStatus.BAD_REQUEST, "role", "Public registration cannot set an account role");
+        }
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new RegistrationException(HttpStatus.BAD_REQUEST, "confirmPassword", "Passwords do not match");
+        }
+        if (!RegistrationRules.fitsBcryptLimit(request.getPassword())) {
+            throw new RegistrationException(HttpStatus.BAD_REQUEST, "password", "Password must be 72 UTF-8 bytes or fewer");
+        }
+        String address = trimToNull(request.getAddress());
+        if (!RegistrationRules.fitsAddressColumn(address)) {
+            throw new RegistrationException(HttpStatus.BAD_REQUEST, "address", "Address is too long");
+        }
+        String email = RegistrationRules.normalizeEmail(request.getEmail());
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+            throw new RegistrationException(HttpStatus.CONFLICT, "email", "Email is already registered");
         }
 
-        // Normalize the email address
-        String email = userRequestDto.getEmail()
-                .trim()
-                .toLowerCase(Locale.ROOT);
-
-        // Check whether the email is already registered
-        if (userRepository.findByEmail(email).isPresent()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Email is already registered");
-        }
-
-        // Convert DTO to User entity
-        User user = modelMapper.map(userRequestDto, User.class);
-
+        User user = new User();
+        user.setFirstName(request.getFirstName().trim());
+        user.setLastName(request.getLastName().trim());
         user.setEmail(email);
-
-        // Assign the role on the backend
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPhone(trimToNull(request.getPhone()));
+        user.setAddress(address);
         user.setUserRole(Role.ROLE_CITIZEN);
-
-        // Encode  password
-        String encodedPassword =
-                passwordEncoder.encode(user.getPassword());
-
-        // Set encoded password  for user
-        user.setPassword(encodedPassword);
-
-        // Save the User entity to database
-        User savedUser = userRepository.save(user);
-
-        // Create the corresponding Citizen profile
+        try {
+            // Flush inside this transaction so a concurrent unique-email conflict is mapped safely.
+            userRepository.saveAndFlush(user);
+        } catch (DataIntegrityViolationException exception) {
+            throw new RegistrationException(HttpStatus.CONFLICT, "email", "Email is already registered");
+        }
         Citizen citizen = new Citizen();
-        citizen.setUser(savedUser);
-        savedUser.setCitizen(citizen);
+        citizen.setUser(user);
+        citizenRepository.saveAndFlush(citizen);
 
-        citizenRepository.save(citizen);
+        UserResponseDto response = new UserResponseDto();
+        response.setUserId(user.getUserId());
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
+        response.setEmail(user.getEmail());
+        response.setPhone(user.getPhone());
+        response.setAddress(user.getAddress());
+        response.setRole(user.getUserRole());
+        response.setCreatedAt(user.getCreatedAt());
+        return response;
+    }
 
-        // Convert saved User entity to response DTO
-        UserResponseDto savedDto =
-                modelMapper.map(savedUser, UserResponseDto.class);
-
-        return savedDto;
+    private static String trimToNull(String value) {
+        if (value == null || value.isBlank()) return null;
+        return value.trim();
     }
 }

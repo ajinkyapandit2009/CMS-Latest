@@ -44,4 +44,5 @@
     <fullyQualifiedTypeName name="com.cmsbackend.enums.ComplaintStatus"/>
     <fullyQualifiedTypeName name="com.cmsbackend.enums.ComplaintPriority"/>
     <fullyQualifiedTypeName name="com.cmsbackend.dtos.UpdateComplaintPriorityRequestDto"/>
+    <fullyQualifiedTypeName name="java.math.RoundingMode"/>
 </qualifiedTypeNameHistroy>

@@ -1,0 +1,19 @@
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/useAuth'
+import { dashboardForRole } from '../services/authService'
+import { notificationDestination } from '../services/notificationNavigation'
+import { getNotifications, getUnreadCount, markAllNotificationsRead, markNotificationRead } from '../services/notificationService'
+
+function NotificationBell() {
+  const { user, token } = useAuth(); const [isOpen, setIsOpen] = useState(false); const [count, setCount] = useState(0); const [items, setItems] = useState([]); const [isLoading, setIsLoading] = useState(false); const [error, setError] = useState(''); const navigate = useNavigate()
+  const refreshCount = useCallback(async () => { try { const result = await getUnreadCount(token); setCount(result?.unreadCount || 0) } catch { setCount(0) } }, [token])
+  const load = useCallback(async () => { setIsLoading(true); setError(''); try { const result = await getNotifications(token); setItems(Array.isArray(result) ? result : []); await refreshCount() } catch (requestError) { setError(requestError.message || 'Unable to load notifications.') } finally { setIsLoading(false) } }, [refreshCount, token])
+  useEffect(() => { let current = true; getUnreadCount(token).then((result) => { if (current) setCount(result?.unreadCount || 0) }).catch(() => { if (current) setCount(0) }); const intervalId = window.setInterval(refreshCount, 30_000); return () => { current = false; window.clearInterval(intervalId) } }, [refreshCount, token])
+  useEffect(() => { const onKey = (event) => { if (event.key === 'Escape') setIsOpen(false) }; document.addEventListener('keydown', onKey); return () => document.removeEventListener('keydown', onKey) }, [])
+  const toggle = () => { const next = !isOpen; setIsOpen(next); if (next) load() }
+  const openItem = async (item) => { if (!item.isRead) { try { await markNotificationRead(item.notificationId, token); setItems((current) => current.map((entry) => entry.notificationId === item.notificationId ? { ...entry, isRead: true } : entry)); await refreshCount() } catch { /* Keep the item unread; navigation remains available. */ } }; setIsOpen(false); navigate(notificationDestination(item, dashboardForRole(user.role))) }
+  const markAll = async () => { try { await markAllNotificationsRead(token); setItems((current) => current.map((item) => ({ ...item, isRead: true }))); setCount(0) } catch (requestError) { setError(requestError.message || 'Unable to update notifications.') } }
+  return <div className="notification-area"><button className="notification-bell" type="button" aria-label="Notifications" aria-expanded={isOpen} aria-controls="notification-panel" onClick={toggle}><span aria-hidden="true">◌</span>{count > 0 && <span className="notification-count">{count > 99 ? '99+' : count}</span>}</button>{isOpen && <section className="notification-panel" id="notification-panel" aria-label="Notifications"><div className="notification-panel-header"><h2>Notifications</h2><button type="button" onClick={markAll} disabled={!items.some((item) => !item.isRead)}>Mark all as read</button></div>{isLoading ? <p className="notification-state">Loading notifications…</p> : error ? <div className="notification-state"><p>{error}</p><button type="button" onClick={load}>Try again</button></div> : items.length ? <ul>{items.map((item) => <li key={item.notificationId} className={item.isRead ? '' : 'unread'}><button type="button" onClick={() => openItem(item)}><strong>{item.title}</strong><span>{item.message}</span><time>{item.createdAt ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.createdAt)) : ''}</time></button></li>)}</ul> : <p className="notification-state">You&apos;re all caught up.</p>}</section>}</div>
+}
+export default NotificationBell

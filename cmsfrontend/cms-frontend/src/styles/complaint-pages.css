@@ -1,0 +1,23 @@
+.complaint-list-page h1,.complaint-details-page h1 { margin: 0; font-family: inherit; font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: 750; letter-spacing: -.05em; line-height: 1.2; }
+.complaint-list-controls { display: grid; grid-template-columns: minmax(180px, 2fr) repeat(3, minmax(130px, 1fr)); gap: 1rem; padding: 1.25rem; margin-top: 1.5rem; background: white; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.complaint-list-controls label { display: grid; gap: .45rem; color: var(--forest); font-size: .78rem; font-weight: 750; }
+.complaint-list-controls input,.complaint-list-controls select { width: 100%; min-width: 0; min-height: 44px; padding: .65rem .75rem; color: var(--ink); background: white; border: 1px solid #bcd2ca; border-radius: var(--radius-sm); font-size: .85rem; }
+.complaint-list-result { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .75rem; margin: 1rem 0; }
+.complaint-list-result p { margin: 0; color: var(--ink-muted); font-size: .82rem; }
+.complaint-table-scroll { overflow-x: auto; background: white; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.complaint-table { width: 100%; min-width: 900px; border-collapse: collapse; text-align: left; font-size: .82rem; }
+.complaint-table th { padding: 1rem; color: var(--forest); background: var(--mint-pale); border-bottom: 1px solid var(--line); white-space: nowrap; font-size: .72rem; }
+.complaint-table td { padding: 1rem; border-bottom: 1px solid var(--line); vertical-align: middle; line-height: 1.5; }
+.complaint-table tr:last-child td { border-bottom: 0; }
+.complaint-table tbody tr:hover { background: #f7fbf9; }
+.complaint-table td:nth-child(2) { min-width: 180px; max-width: 320px; }
+.complaint-title-link,.complaint-details-link,.complaint-back-link { color: var(--teal-dark); font-weight: 700; text-decoration: underline; text-underline-offset: .2em; }
+.complaint-title-link { overflow-wrap: anywhere; }
+.complaint-details-link { display: inline-block; padding-block: .5rem; white-space: nowrap; }
+.complaint-back-link { display: inline-block; margin-bottom: 1.5rem; font-size: .85rem; }
+.complaint-detail-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; padding: 1.25rem; margin: 1.25rem 0; background: white; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.complaint-detail-summary dt { color: var(--ink-muted); font-size: .74rem; }
+.complaint-detail-summary dd { margin: .4rem 0 0; color: var(--forest); overflow-wrap: anywhere; font-size: .88rem; font-weight: 650; }
+.complaint-detail-description { padding: 1.2rem; color: var(--ink-muted); line-height: 1.65; white-space: pre-wrap; background: white; border: 1px solid var(--line); border-radius: var(--radius-md); }
+@media (max-width: 1160px) { .complaint-list-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 540px) { .complaint-list-controls,.complaint-detail-summary { grid-template-columns: 1fr; }.complaint-list-page .management-header,.complaint-details-page .management-header { flex-direction: column; align-items: flex-start; } }

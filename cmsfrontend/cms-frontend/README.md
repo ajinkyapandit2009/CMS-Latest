@@ -1,5 +1,9 @@
 # React + Vite
 
+## Case officer workload indicators
+
+The Admin Dashboard counts assigned and in-progress complaints for each officer. Green covers 0–3 active complaints, yellow 4–7, and red 8 or more by default. To change the display thresholds, set positive integers `VITE_CMS_WORKLOAD_YELLOW_FROM` and `VITE_CMS_WORKLOAD_RED_FROM` before starting or building Vite. The red threshold must exceed the yellow threshold. These colors are informational and do not assign complaints.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

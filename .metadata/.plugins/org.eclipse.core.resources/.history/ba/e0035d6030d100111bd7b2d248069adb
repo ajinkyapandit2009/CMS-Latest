@@ -1,5 +1,0 @@
-package com.cmsbackend.dto;
-
-public class RegisterRequest {
-
-}

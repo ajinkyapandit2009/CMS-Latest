@@ -3,6 +3,7 @@ package com.cmsbackend.repositories;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import com.cmsbackend.entities.Complaint;
 import com.cmsbackend.enums.ComplaintPriority;
 import com.cmsbackend.enums.ComplaintStatus;
+import jakarta.persistence.LockModeType;
+import java.util.Optional;
 
 @Repository
 public interface ComplaintRepository
@@ -22,6 +25,10 @@ public interface ComplaintRepository
     List<Complaint> findByOfficer_UserIdOrderByCreatedAtDesc(
             Integer officerId
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM Complaint c WHERE c.complaintId = :complaintId")
+    Optional<Complaint> findByIdForEscalation(@Param("complaintId") Integer complaintId);
     
     @Query("""
     	    SELECT c

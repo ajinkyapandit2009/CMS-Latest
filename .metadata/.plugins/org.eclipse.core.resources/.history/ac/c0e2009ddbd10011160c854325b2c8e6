@@ -1,5 +1,0 @@
-package com.cmsbackend.enums;
-
-public enum Role {
-
-}

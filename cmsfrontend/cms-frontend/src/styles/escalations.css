@@ -1,0 +1,37 @@
+.escalations-page h1 { margin: 0; font-family: inherit; font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: 750; letter-spacing: -.05em; }
+.escalation-panel { display: grid; gap: 1.25rem; padding: clamp(1.2rem, 3vw, 1.8rem); margin-top: 1.5rem; background: white; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.escalation-panel-header,.escalation-entry-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.escalation-panel-header h2 { margin: 0; color: var(--forest); font-size: 1.35rem; }
+.escalation-panel-header p:last-child { margin: .35rem 0 0; color: var(--ink-muted); font-size: .86rem; line-height: 1.5; }
+.escalation-panel .eyebrow { margin-bottom: .35rem; }
+.escalation-note { margin: 0; padding: .8rem 1rem; color: var(--teal-dark); background: var(--mint-pale); border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: .86rem; }
+.escalation-empty { margin: 0; padding: 1rem; color: var(--ink-muted); background: var(--mint-pale); border-radius: var(--radius-sm); }
+.escalation-history-list { display: grid; gap: 1rem; }
+.escalation-entry { min-width: 0; padding: 1.2rem; background: white; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.escalation-panel .escalation-entry { background: var(--mint-pale); }
+.escalation-entry h2,.escalation-entry h3 { margin: 0; color: var(--forest); font-size: 1.05rem; line-height: 1.4; overflow-wrap: anywhere; }
+.escalation-status { display: inline-flex; flex: 0 0 auto; padding: .35rem .7rem; color: #6f5300; background: #fff1c9; border-radius: 999px; font-size: .73rem; font-weight: 800; }
+.escalation-status.accepted { color: #17663a; background: #ddf5e6; }
+.escalation-status.declined { color: #8d3025; background: #ffebe7; }
+.escalation-reason,.escalation-text p,.escalation-remarks { margin: .9rem 0 0; color: var(--ink); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.escalation-text { margin-top: 1rem; padding: 1rem; background: var(--mint-pale); border-radius: var(--radius-sm); }
+.escalation-text strong,.escalation-remarks strong { color: var(--forest); font-size: .82rem; }
+.escalation-text p { margin-top: .35rem; }
+.escalation-remarks { padding: .8rem 1rem; background: #f1f8f4; border-radius: var(--radius-sm); }
+.escalation-meta { display: flex; flex-wrap: wrap; gap: .8rem 2rem; margin: 1rem 0 0; }
+.escalation-meta dt { color: var(--ink-muted); font-size: .72rem; }
+.escalation-meta dd { margin: .25rem 0 0; color: var(--forest); font-size: .85rem; font-weight: 650; }
+.escalation-form { display: grid; gap: .75rem; padding: 1rem; background: var(--mint-pale); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.escalation-form label { display: grid; gap: .4rem; color: var(--forest); font-size: .8rem; font-weight: 750; }
+.escalation-form textarea,.escalation-form select,.escalation-filters select { width: 100%; min-width: 0; padding: .7rem .8rem; color: var(--ink); background: white; border: 1px solid #bcd2ca; border-radius: var(--radius-sm); font: inherit; }
+.escalation-form textarea { resize: vertical; }
+.escalation-form textarea:focus,.escalation-form select:focus,.escalation-filters select:focus { border-color: var(--teal); outline: none; box-shadow: 0 0 0 3px rgba(13,110,101,.14); }
+.escalation-form-actions { display: flex; flex-wrap: wrap; gap: .7rem; }
+.escalation-form .button { justify-self: start; }
+.escalation-form .inline-error { margin: 0; }
+.escalation-review-fields { display: grid; grid-template-columns: minmax(170px, .6fr) minmax(0, 1.4fr); gap: 1rem; align-items: start; }
+.escalation-filters { display: flex; align-items: center; gap: .8rem; padding: 1rem; margin: 1.2rem 0; background: var(--mint-pale); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.escalation-filters label { color: var(--forest); font-size: .8rem; font-weight: 750; }
+.escalation-filters select { width: min(280px, 100%); }
+.escalations-page > .inline-success { margin: 1rem 0; }
+@media (max-width: 650px) { .escalation-panel-header,.escalation-entry-heading { flex-direction: column; }.escalation-panel-header .button,.escalation-review-fields,.escalation-form-actions .button,.escalation-form > .button { width: 100%; }.escalation-review-fields { grid-template-columns: 1fr; }.escalation-filters { align-items: stretch; flex-direction: column; }.escalation-filters select { width: 100%; } }

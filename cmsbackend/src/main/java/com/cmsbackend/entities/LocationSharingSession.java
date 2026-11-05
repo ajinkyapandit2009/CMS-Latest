@@ -1,0 +1,42 @@
+package com.cmsbackend.entities;
+
+import java.math.BigDecimal;
+import java.sql.Types;
+import java.time.LocalDateTime;
+import java.util.UUID;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import com.cmsbackend.enums.LocationSharingStatus;
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Data
+@Entity
+@Table(name = "location_sharing_sessions")
+public class LocationSharingSession {
+	@Id
+	@JdbcTypeCode(Types.CHAR)
+	@Column(name = "session_id", length = 36)
+	private UUID sessionId;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
+	@Column(name = "token_hash", nullable = false, unique = true, length = 64)
+	private String tokenHash;
+	@Column(precision = 10, scale = 8)
+	private BigDecimal latitude;
+	@Column(precision = 11, scale = 8)
+	private BigDecimal longitude;
+	@Column(name = "accuracy_meters", precision = 10, scale = 2)
+	private BigDecimal accuracyMeters;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 20)
+	private LocationSharingStatus status;
+	@CreationTimestamp
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private LocalDateTime createdAt;
+	@Column(name = "expires_at", nullable = false)
+	private LocalDateTime expiresAt;
+	@Column(name = "consumed_at")
+	private LocalDateTime consumedAt;
+}

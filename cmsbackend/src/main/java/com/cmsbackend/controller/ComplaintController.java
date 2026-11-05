@@ -47,4 +47,10 @@ public class ComplaintController {
 
         return ResponseEntity.ok(complaints);
     }
+
+    @GetMapping("/{complaintId}")
+    public ResponseEntity<ComplaintResponseDto> getComplaint(
+            @PathVariable Integer complaintId, Authentication authentication) {
+        return ResponseEntity.ok(complaintService.getComplaint(complaintId, authentication.getName()));
+    }
 }

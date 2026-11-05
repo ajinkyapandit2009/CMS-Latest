@@ -2,10 +2,8 @@
 package com.cmsbackend.services;
 
 import com.cmsbackend.dtos.UserRequestDto;
-import com.cmsbackend.dtos.UserResponseDto;
+import com.cmsbackend.dtos.CaseOfficerResponseDto;
 
 public interface AdminService {
-
-    UserResponseDto createCaseOfficerAccount(
-            UserRequestDto userRequestDto);
+    CaseOfficerResponseDto createCaseOfficerWithProfile(UserRequestDto userRequestDto);
 }

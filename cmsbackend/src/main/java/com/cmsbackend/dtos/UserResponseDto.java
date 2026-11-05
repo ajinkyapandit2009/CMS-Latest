@@ -23,6 +23,7 @@ public class UserResponseDto {
     private String address;
 
     private Role role;
+    private String employeeNumber;
 
     private LocalDateTime createdAt;
 }

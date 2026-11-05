@@ -20,6 +20,8 @@ public interface ComplaintService {
     List<ComplaintResponseDto> getMyComplaints(
             String email);
 
+    ComplaintResponseDto getComplaint(Integer complaintId, String email);
+
     ComplaintResponseDto assignComplaint(
             Integer complaintId,
             AssignComplaintRequestDto requestDto,

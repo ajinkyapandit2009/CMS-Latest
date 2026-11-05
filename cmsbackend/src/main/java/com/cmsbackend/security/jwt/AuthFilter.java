@@ -35,19 +35,6 @@ public class AuthFilter extends OncePerRequestFilter {
 
 		
 		
-		System.out.println("AuthFilter URL: " + request.getRequestURI());
-		System.out.println("Authorization header present: "
-		        + (request.getHeader("Authorization") != null));
-		System.out.println("JWT extracted: " + (token != null));
-
-		if (token != null) {
-		    System.out.println("JWT valid: "
-		            + jwtUtils.validateJwtToken(token));
-		}
-		
-	
-		
-		
 		if (token != null && jwtUtils.validateJwtToken(token)
 				&& SecurityContextHolder.getContext().getAuthentication() == null) {
 

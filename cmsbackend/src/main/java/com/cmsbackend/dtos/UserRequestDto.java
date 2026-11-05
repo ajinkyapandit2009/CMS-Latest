@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 public class UserRequestDto {
@@ -25,9 +26,11 @@ public class UserRequestDto {
 
     @NotBlank
     @Pattern(regexp = "^((?=\\S*?[A-Z])(?=\\S*?[a-z])(?=\\S*?[0-9]).{6,})\\S$")
+    @ToString.Exclude
     private String password;
 
     @NotBlank
+    @ToString.Exclude
     private String confirmPassword;
 
     @Size(max = 15)

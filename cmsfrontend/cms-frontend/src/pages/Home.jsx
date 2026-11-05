@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/useAuth'
+import { dashboardForRole } from '../services/authService'
 import drainImage from '../assets/civic/clogged-drain.png'
 import footpathImage from '../assets/civic/damaged-footpath.png'
 import signalImage from '../assets/civic/damaged-signal.png'
@@ -22,9 +24,16 @@ const comparisons = [
   { title: 'A clearer route', before: waterloggingImage, after: heroImage, beforeAlt: 'Illustrative waterlogged road', afterAlt: 'Illustrative clear neighbourhood street' },
 ]
 
+function ReportAction() {
+  const { user, isInitializing } = useAuth()
+  if (isInitializing) return null
+  if (user && user.role !== 'ROLE_CITIZEN') return <Link className="button button-primary" to={dashboardForRole(user.role) || '/access-denied'}>Open dashboard</Link>
+  return <Link className="button button-primary" to={user ? '/complaints/new' : '/login'}>{user ? 'Raise a Complaint' : 'Sign in to report'} <span aria-hidden="true">→</span></Link>
+}
+
 function Home() {
   return <>
-    <section className="home-hero"><div className="container hero-layout"><div className="hero-copy"><p className="eyebrow">Civic Management System</p><h1>See a Problem? Let&apos;s Fix It Together.</h1><p>From potholes and overflowing garbage to waterlogging and damaged footpaths, report civic issues in your neighbourhood and help build a cleaner, safer, more accessible community.</p><div className="button-row hero-actions"><Link className="button button-primary" to="/login">Raise a Complaint <span aria-hidden="true">→</span></Link><a className="button button-secondary" href="#civic-issues">Explore Civic Issues</a></div></div><div className="hero-visual"><img src={heroImage} alt="Residents on a green urban street looking at a civic infrastructure concern" /><div className="hero-caption"><span aria-hidden="true">●</span> Notice. Report. Follow progress.</div></div></div></section>
+    <section className="home-hero"><div className="container hero-layout"><div className="hero-copy"><p className="eyebrow">Civic Management System</p><h1>See a Problem? Let&apos;s Fix It Together.</h1><p>From potholes and overflowing garbage to waterlogging and damaged footpaths, report civic issues in your neighbourhood and help build a cleaner, safer, more accessible community.</p><div className="button-row hero-actions"><ReportAction /><a className="button button-secondary" href="#civic-issues">Explore Civic Issues</a></div></div><div className="hero-visual"><img src={heroImage} alt="Residents on a green urban street looking at a civic infrastructure concern" /><div className="hero-caption"><span aria-hidden="true">●</span> Notice. Report. Follow progress.</div></div></div></section>
 
     <section className="issues-section section-space" id="civic-issues"><div className="container"><div className="section-heading"><p className="eyebrow">What can be reported</p><h2>Small Issues. Big Impact.</h2><p>Everyday civic problems affect how we live, travel, and experience our neighbourhoods.</p></div><div className="issues-grid">{issues.map((issue) => <article className="issue-card" key={issue.title}><img src={issue.image} alt={issue.alt} loading="lazy" /><div><h3>{issue.title}</h3><p>{issue.text}</p></div></article>)}</div></div></section>
 
@@ -34,7 +43,7 @@ function Home() {
 
     <section className="purpose-section section-space" id="about"><div className="container purpose-layout"><div><p className="eyebrow">Why CMS exists</p><h2>Better reporting begins with a clearer path.</h2></div><div><p>Problems such as potholes, overflowing garbage, clogged drains, and unsafe footpaths can affect health, safety, accessibility, and daily life. CMS is a structured digital platform for reporting civic issues and supporting the administrative process of managing complaints.</p><ul className="benefit-list"><li>Simpler reporting for citizens</li><li>Organized complaint information</li><li>Better visibility into complaint status</li><li>Coordination between citizens, administrators, and case officers</li></ul></div></div></section>
 
-    <section className="closing-section"><div className="container closing-card"><p className="eyebrow">Your voice matters</p><h2>Your Neighbourhood Deserves Better.</h2><p>Noticed something that needs attention? Take the first step toward a better neighbourhood.</p><Link className="button button-primary" to="/login">Raise a Complaint <span aria-hidden="true">→</span></Link></div></section>
+    <section className="closing-section"><div className="container closing-card"><p className="eyebrow">Your voice matters</p><h2>Your Neighbourhood Deserves Better.</h2><p>Noticed something that needs attention? Take the first step toward a better neighbourhood.</p><ReportAction /></div></section>
   </>
 }
 

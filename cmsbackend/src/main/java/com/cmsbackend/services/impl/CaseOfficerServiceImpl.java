@@ -6,21 +6,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.cmsbackend.dtos.CaseOfficerRequestDto;
 import com.cmsbackend.dtos.CaseOfficerResponseDto;
+import com.cmsbackend.dtos.CaseOfficerWorkloadDto;
 import com.cmsbackend.entities.CaseOfficer;
 import com.cmsbackend.entities.User;
 import com.cmsbackend.enums.Role;
+import com.cmsbackend.enums.ComplaintStatus;
 import com.cmsbackend.repositories.CaseOfficerRepository;
 import com.cmsbackend.repositories.UserRepository;
 import com.cmsbackend.services.CaseOfficerService;
 
 @Service
 public class CaseOfficerServiceImpl implements CaseOfficerService {
+    private static final Pattern EMPLOYEE_NUMBER = Pattern.compile("^CMS-OFF-([0-9]+)$");
 
     @Autowired
     private UserRepository userRepository;
@@ -31,10 +38,14 @@ public class CaseOfficerServiceImpl implements CaseOfficerService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private WorkloadCoordinator workloadCoordinator;
+
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public CaseOfficerResponseDto createCaseOfficer(
             CaseOfficerRequestDto requestDto) {
+        workloadCoordinator.lock();
 
         // 1. Find the existing user account
         User user = userRepository.findById(requestDto.getUserId())
@@ -68,7 +79,7 @@ public class CaseOfficerServiceImpl implements CaseOfficerService {
 
         // 6. Save the officer profile
         CaseOfficer savedCaseOfficer =
-                caseOfficerRepository.save(caseOfficer);
+                caseOfficerRepository.saveAndFlush(caseOfficer);
 
         // 7. Map the saved entity to the response DTO
         CaseOfficerResponseDto responseDto =
@@ -102,23 +113,37 @@ public class CaseOfficerServiceImpl implements CaseOfficerService {
                 .toList();
     }
 
-    // Generate the next employee number using the highest existing number
+    @Override
+    @Transactional(readOnly = true)
+    public List<CaseOfficerWorkloadDto> getOfficerWorkloads() {
+        return caseOfficerRepository.findWorkloadCounts(
+                ComplaintStatus.ASSIGNED, ComplaintStatus.IN_PROGRESS)
+                .stream()
+                .map(count -> {
+                    long assigned = count.getAssignedCount();
+                    long inProgress = count.getInProgressCount();
+                    return new CaseOfficerWorkloadDto(
+                            count.getUserId(), count.getFirstName(), count.getLastName(),
+                            count.getEmployeeNumber(), assigned, inProgress,
+                            assigned + inProgress);
+                })
+                .toList();
+    }
+
+    // Caller holds WorkloadCoordinator's database row lock across this read and insert.
     private String generateEmployeeNumber() {
-
-        CaseOfficer lastOfficer =
-                caseOfficerRepository.findTopByOrderByEmployeeNumberDesc();
-
-        int nextNumber = 1;
-
-        if (lastOfficer != null
-                && lastOfficer.getEmployeeNumber() != null) {
-
-            String lastNumber = lastOfficer.getEmployeeNumber()
-                    .replace("CMS-OFF-", "");
-
-            nextNumber = Integer.parseInt(lastNumber) + 1;
+        long highest = 0;
+        for (String value : caseOfficerRepository.findAllEmployeeNumbers()) {
+            Matcher match = EMPLOYEE_NUMBER.matcher(value);
+            if (match.matches()) {
+                try {
+                    highest = Math.max(highest, Long.parseLong(match.group(1)));
+                } catch (NumberFormatException exception) {
+                    throw new IllegalStateException("Existing employee number exceeds the supported range");
+                }
+            }
         }
-
-        return String.format("CMS-OFF-%03d", nextNumber);
+        if (highest == Long.MAX_VALUE) throw new IllegalStateException("Employee number range is exhausted");
+        return String.format(Locale.ROOT, "CMS-OFF-%03d", highest + 1);
     }
 }

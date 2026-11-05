@@ -1,0 +1,8 @@
+uploads/
+
+# Local HTTPS certificates and private keys
+**/*-key.pem
+**/*.key
+**/*.p12
+**/*.pfx
+cmsfrontend/cms-frontend/*.pem
